@@ -1,5 +1,6 @@
 from api.audio_features import get_audio_features
 from api.credentials import get_credentials
+from api.get_album import get_album
 from api.tracks_of_album import get_tracks_of_album
 from colorama import init as colorama_init
 from colorama import Back, Fore, Style
@@ -74,14 +75,8 @@ for row in csv.reader(sys.argv, delimiter=","):
             )
             + Style.RESET_ALL
         )
-    else:
-        output[row[2]] = {}
-        output[row[2]]["album_name"] = row[0]
-        output[row[2]]["artist"] = row[1]
-        output[row[2]]["tracks"] = {}
-        output[row[2]]["credit"] = row[3]
-        output[row[2]]["anthony_score"] = row[4]
 
+    else:
         print()
         print(
             Fore.GREEN
@@ -90,6 +85,24 @@ for row in csv.reader(sys.argv, delimiter=","):
             )
             + Style.RESET_ALL
         )
+
+        output[row[2]] = {}
+        output[row[2]]["album_name"] = row[0]
+        output[row[2]]["artist"] = row[1]
+        output[row[2]]["tracks"] = {}
+        output[row[2]]["credit"] = row[3]
+        output[row[2]]["anthony_score"] = row[4]
+
+        album = get_album(row[2].split(":")[2], credentials, abort_on_error=False)
+
+        output[row[2]]["album_type"] = album["album_type"]
+        output[row[2]]["artists"] = album["artists"]
+        output[row[2]]["available_markets"] = album["available_markets"]
+        output[row[2]]["genres"] = album["genres"]
+        output[row[2]]["popularity"] = album["popularity"]
+        output[row[2]]["release_date"] = album["release_date"]
+        output[row[2]]["release_date_precision"] = album["release_date_precision"]
+
         tracks = get_tracks_of_album(
             row[2].split(":")[2], credentials, abort_on_error=False
         )
