@@ -12,6 +12,8 @@ with open("/data/input", "r") as file:
     data = json.load(file)
 
 columns = {
+    "release_date": [],
+    "popularity": [],
     "anthony_score": [],
     "acousticness": [],
     "danceability": [],
@@ -31,6 +33,8 @@ for album_uri, album in data.items():
 
     def aggregate_mean():
         aggregated = {
+            "release_date": int(album["release_date"][:4]),
+            "popularity": int(album["popularity"]),
             "anthony_score": float(album["anthony_score"]) / 10,
             "acousticness": 0,
             "danceability": 0,
@@ -81,6 +85,8 @@ for album_uri, album in data.items():
 
     def aggregate_meadian():
         aggregated = {
+            "release_date": int(album["release_date"][:4]),
+            "popularity": int(album["popularity"]),
             "anthony_score": float(album["anthony_score"]) / 10,
             "acousticness": [],
             "danceability": [],
@@ -134,6 +140,8 @@ for album_uri, album in data.items():
     # aggregated = aggregate_mean()
     aggregated = aggregate_meadian()
 
+    columns["release_date"].append(aggregated["release_date"])
+    columns["popularity"].append(aggregated["popularity"])
     columns["anthony_score"].append(aggregated["anthony_score"])
     columns["acousticness"].append(aggregated["acousticness"])
     columns["danceability"].append(aggregated["danceability"])
@@ -152,6 +160,8 @@ for album_uri, album in data.items():
 df = pd.DataFrame(columns)
 pprint(df)
 
+print('"anthony_score" corr {} with "release_date"'.format(df["anthony_score"].corr(df["release_date"])))
+print('"anthony_score" corr {} with "popularity"'.format(df["anthony_score"].corr(df["popularity"])))
 print('"anthony_score" corr {} with "acousticness"'.format(df["anthony_score"].corr(df["acousticness"])))
 print('"anthony_score" corr {} with "danceability"'.format(df["anthony_score"].corr(df["danceability"])))
 print('"anthony_score" corr {} with "duration_ms"'.format(df["anthony_score"].corr(df["duration_ms"])))
@@ -169,6 +179,10 @@ print('"anthony_score" corr {} with "valence"'.format(df["anthony_score"].corr(d
 Y = df["anthony_score"]
 
 model = linear_model.LinearRegression()
+model.fit(df[["release_date"]], Y)
+print('R-squared {} using "release_date"'.format(model.score(df[["release_date"]], Y)))
+model.fit(df[["popularity"]], Y)
+print('R-squared {} using "popularity"'.format(model.score(df[["popularity"]], Y)))
 model.fit(df[["acousticness"]], Y)
 print('R-squared {} using "acousticness"'.format(model.score(df[["acousticness"]], Y)))
 model.fit(df[["danceability"]], Y)
@@ -200,13 +214,19 @@ print()
 print('"danceability" and "instrumentalness" are the best candidates')
 print()
 
-X = df[["danceability", "instrumentalness"]]
+X = df[["popularity", "danceability", "instrumentalness"]]
 model.fit(X, Y)
 
-print('R-squared {} using "danceability" and "instrumentalness"'.format(model.score(X, Y)))
+print('R-squared {} using "popularity", "danceability" and "instrumentalness"'.format(model.score(X, Y)))
 
 print("Bad linear model, only explains %.2f%% of the data" % (model.score(X, Y) * 100))
 
+ax = df.plot.scatter(x='release_date', y='anthony_score', c='DarkBlue')
+fig = ax.get_figure()
+fig.savefig('/app/images/release_date.png')
+ax = df.plot.scatter(x='popularity', y='anthony_score', c='DarkBlue')
+fig = ax.get_figure()
+fig.savefig('/app/images/popularity.png')
 ax = df.plot.scatter(x='acousticness', y='anthony_score', c='DarkBlue')
 fig = ax.get_figure()
 fig.savefig('/app/images/acousticness.png')
