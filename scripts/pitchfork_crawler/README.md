@@ -1,6 +1,6 @@
-# Spotify Crawler
+# Pitchfork Spotify Crawler
 
-This project is intended to crawl the spotify APIs for a specific purpose.
+This project is intended to crawl the spotify APIs using the [Pitchfork Database](https://www.kaggle.com/nolanbconaway/pitchfork-data) for a specific purpose.
 
 ## How to Run
 
