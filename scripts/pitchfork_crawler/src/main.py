@@ -4,7 +4,7 @@ from colorama import init as colorama_init
 from colorama import Back, Fore, Style
 from utils.better_pprint import pprint
 from utils.cache import CacheManager
-from utils.levenshtein_distance import LD
+from utils.levenshtein_distance import LD, LD_confidence
 import csv
 import json
 import sqlite3
@@ -71,7 +71,9 @@ output = {}
 
 search_count = 0
 db_size = next(cur.execute("SELECT COUNT(*) FROM reviews"))[0]
-for row in cur.execute("SELECT * FROM reviews"):
+for row in cur.execute(
+    "SELECT * FROM reviews WHERE title IS NOT NULL AND title != '' AND artist IS NOT NULL AND artist != ''"
+):
     search_count += 1
 
     if cache[row[0]] is not None:
@@ -83,6 +85,7 @@ for row in cur.execute("SELECT * FROM reviews"):
             )
             + Style.RESET_ALL
         )
+
     else:
         print()
         print(
@@ -103,7 +106,15 @@ for row in cur.execute("SELECT * FROM reviews"):
                 if row[2].lower() != "various artists"
                 else 0
             )
-            output[row[0]].append((album["uri"], ld1 + ld2, ld1, ld2, album["name"]))
+            output[row[0]].append(
+                (
+                    album["uri"],
+                    ld1 + ld2,
+                    ld1,
+                    ld2,
+                    LD_confidence(ld1 + ld2, len(row[1]), len(row[2])),
+                )
+            )
 
         output[row[0]].sort(key=lambda tup: tup[1])
         cache[row[0]] = output[row[0]]
@@ -116,11 +127,7 @@ for row in cur.execute("SELECT * FROM reviews"):
                 + Style.RESET_ALL
             )
         else:
-            print(
-                Fore.YELLOW
-                + "     → No search result!"
-                + Style.RESET_ALL
-            )
+            print(Fore.YELLOW + "     → No search result!" + Style.RESET_ALL)
 
 
 print()

@@ -11,6 +11,10 @@ The true bot of Anthony Fantano!
 ./scripts/spotify_crawler/run.sh $PWD/data/Music_Classification_Sheet_Classification_of_URI_and_Score.csv
 ```
 
+```
+./scripts/pitchfork_crawler/run.sh $PWD/data/pitchfork.sqlite
+```
+
 ## Running Models
 
 ### Multiple Linear Regression
