@@ -70,9 +70,10 @@ credentials = get_credentials(client_id, client_secret)
 output = {}
 
 search_count = 0
+percentile95 = 0
 db_size = next(cur.execute("SELECT COUNT(*) FROM reviews"))[0]
 for row in cur.execute(
-    "SELECT * FROM reviews WHERE title IS NOT NULL AND title != '' AND artist IS NOT NULL AND artist != ''"
+    "SELECT * FROM reviews WHERE title IS NOT NULL AND title != '' AND title != '*' AND artist IS NOT NULL AND artist != ''"
 ):
     search_count += 1
 
@@ -129,13 +130,18 @@ for row in cur.execute(
         else:
             print(Fore.YELLOW + "     → No search result!" + Style.RESET_ALL)
 
+    if len(output[row[0]]) > 0:
+        if output[row[0]][0][4] <= 0.95:
+            percentile95 += 1
+        else:
+            pass
 
 print()
 print()
 print(
     Fore.GREEN
-    + "     ☮ {0} searches completed in {1:.3f} seconds! ☮".format(
-        search_count, time.time() - start_time
+    + "     ☮ {0} searches ({1} bigger than 95%% in confidence) completed in {2:.3f} seconds! ☮".format(
+        search_count, search_count - percentile95, time.time() - start_time
     )
     + Style.RESET_ALL
 )
