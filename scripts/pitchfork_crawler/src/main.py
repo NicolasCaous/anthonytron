@@ -177,6 +177,7 @@ for row in cur.execute(
                         track["uri"].split(":")[2],
                         credentials,
                         index=i,
+                        abort_on_error=False
                     )
                 output[row[0]]["tracks-searched"] = True
                 cache[row[0]] = output[row[0]]
